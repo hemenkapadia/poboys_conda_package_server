@@ -37,7 +37,7 @@ if args.prefix:
 else:
     prefix = '/poboys'
 
-platforms = ['noarch', 'linux-64', 'win-64', 'osx-64']
+platforms = ['noarch', 'linux-64', 'win-64', 'osx-64', 'linux-ppc64le']
 
 
 def ensure_pkgs_dir_exists():
