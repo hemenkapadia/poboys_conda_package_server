@@ -6,10 +6,8 @@ set -e
 echo "Activating conda env..."
 source activate poboys_env
 
-# copy everything from staging
-if [ ! -f /opt/poboys_conda_package_server/poboys_conda_package_server.py ]; then
-	cp -ax /opt/poboys_staging/* /opt/poboys_conda_package_server
-fi
+# copy everything from staging,this will ensure latest code is in dir that runs server
+cp -ax /opt/poboys_staging/* /opt/poboys_conda_package_server
 cd /opt/poboys_conda_package_server
 
 if [ -n "$POBOYS_PORT" ]; then
