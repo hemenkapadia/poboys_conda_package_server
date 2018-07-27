@@ -4,11 +4,12 @@
 set -e 
 
 echo "Activating conda env..."
-source "$(which activate)" poboys_env
+source activate poboys_env
 
 # copy everything from staging
-mkdir /opt/poboys_conda_package_server
-cp -ax /opt/poboys_staging/* /opt/poboys_conda_package_server
+if [ ! -f /opt/poboys_conda_package_server/poboys_conda_package_server.py ]; then
+	cp -ax /opt/poboys_staging/* /opt/poboys_conda_package_server
+fi
 cd /opt/poboys_conda_package_server
 
 if [ -n "$POBOYS_PORT" ]; then

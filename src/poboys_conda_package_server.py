@@ -151,7 +151,7 @@ def del_file(platform, filename):
 
     try:
         # move to a tempdir (in case we need to undo this)
-        os.rename(os.path.join(platform_dir, filename), os.path.join(tempdir, filename))
+        os.remove(os.path.join(platform_dir, filename))
     except OSError:
         pass
 
@@ -172,7 +172,7 @@ def del_file(platform, filename):
             abort(503, "Failed to delete from S3 bucket %s with exception %s" % (s3_bucket, str(e)))
 
     # commit the delete
-    os.remove(os.path.join(tempdir, filename))
+    # os.remove(os.path.join(tempdir, filename))
 
     redirect(prefix + '/pkgs/' + platform)
 
