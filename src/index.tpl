@@ -10,7 +10,7 @@ Below packages are hosted internally on Poboy's server
     <li><a href="{{prefix}}/pkgs">Main Channel - Package List</a></li>
 </ul>
 
-<h4>Upload</h4>
+<h4>Form Upload</h4>
 <form action="{{prefix}}/upload" method="post" enctype="multipart/form-data">
 <div>platform
     <select name="platform">
@@ -26,6 +26,22 @@ Below packages are hosted internally on Poboy's server
     <input type="submit" value="Upload" />
 </div>
 </form>
+
+<h4>CURL Upload</h4>
+You can use the below command to upload the conda package programmatically to poboy's server. Replace <filename> with
+the name of the file you are uploading. Replace <hostname:port> with details of your poboy server. Possible valued for
+<platform> are as below
+<ul>
+    <li>noarch</li>
+    <li>linux-64</li>
+    <li>win-64</li>
+    <li>osx-64</li>
+    <li>linux-ppc64le</li>
+</ul>
+
+<code>
+curl -vvv -H 'Expect:' -F platform=<platform> -F fileupload=@<filename> http://<hostname:[port]>/poboys/upload
+</code>
 
 
 <h3>Anaconda Repositories</h3>
