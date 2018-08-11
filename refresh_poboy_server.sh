@@ -82,7 +82,7 @@ build_docker_image() {
 start_poboy_conda_server() {
    docker run -d --name "${CONTAINER_NAME}" \
               -p 6969:6969 \
-              -v $(pwd):/opt/"${IMAGE_NAME}" \
+              -v $(pwd)/../conda-repo-root:/opt/"${IMAGE_NAME}" \
               "${IMAGE_NAME}"
 }
 
