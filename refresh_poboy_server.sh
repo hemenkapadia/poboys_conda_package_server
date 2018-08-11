@@ -57,7 +57,10 @@ get_options() {
 check_stop_container() {
     container_id=$(docker ps -a --format "{{.Names}},{{.ID}}" | grep "${CONTAINER_NAME}" | cut -d "," -f 2)
     if [[ -n "${container_id}" ]] ; then
-        docker container stop "${container_id}" && log "Container ${container_id} stopped."
+        docker container stop "${container_id}" > /dev/null && \
+        log "Container ${container_id} stopped." && \
+        docker container rm "${container_id}" > /dev/null && \
+        log "Container ${container_id} removed."
     fi
 }
 
