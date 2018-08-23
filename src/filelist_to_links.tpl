@@ -1,16 +1,17 @@
 <h1>{{header}}</h1>
 
 %for f in filelist:
-    %if allow_delete:
-    <div>
-        <form action="{{prefix}}/delete{{parenturl}}/{{f}}" method="post">
-            <a href="{{prefix}}{{parenturl}}/{{f}}">{{f}}</a>
-            <input type="submit" value="Delete" />
-        </form>
-    </div>
-    %else:
     <div>
         <a href="{{prefix}}{{parenturl}}/{{f}}">{{f}}</a>
-    </div>
+    %if allow_delete:
+        <form action="{{prefix}}/delete{{parenturl}}/{{f}}" method="post">
+            <input type="submit" value="Delete" />
+        </form>
     %end
+    %if anaconda_release:
+        <form action="{{prefix}}/anaconda/release{{parenturl}}/{{f}}" method="post">
+            <input type="submit" value="Anaconda Release" />
+        </form>
+    %end
+    </div>
 %end

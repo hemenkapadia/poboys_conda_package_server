@@ -18,11 +18,20 @@ log.setLevel(logging.INFO)
 # need to parse args right away because decorators depend on args
 prefix = None
 s3_bucket = None
+anaconda_release = False
+anaconda_user = None
+anaconda_password = None
+anaconda_org = None
 parser = argparse.ArgumentParser()
 parser.add_argument("--port", type=int, help="port to listen on")
 parser.add_argument("--s3_bucket", help="S3 bucket to sync with")
 parser.add_argument("--prefix", help="Prefix to also serve webpage at, i.e. www.example.com and www.example.com/prefix/")
+parser.add_argument("--ac_user", help="Anaconda user name" )
+parser.add_argument("--ac_pass", help="Anaconda user name" )
+parser.add_argument("--ac_org", help="Anaconda user name" )
+
 args = parser.parse_args()
+
 if not args.port:
     args.port = 6969
 if args.s3_bucket:
@@ -36,6 +45,13 @@ if args.prefix:
     prefix = args.prefix
 else:
     prefix = '/poboys'
+if args.ac_user and args.ac_pass:
+    anaconda_user = args.ac_user
+    anaconda_password = args.ac_pass
+    anaconda_release = True
+if args.ac_org:
+    anaconda_org = args.ac_org
+
 
 platforms = ['noarch', 'linux-64', 'win-64', 'osx-64', 'linux-ppc64le']
 
@@ -114,7 +130,13 @@ def do_upload():
 def get_pkgs():
     pkgs_dir = ensure_pkgs_dir_exists()
     filelist = sorted([ f for f in os.listdir(pkgs_dir) ])
-    return template('filelist_to_links', header='Current Platforms', prefix=prefix, parenturl='/pkgs', filelist=filelist, allow_delete=False)
+    return template('filelist_to_links',
+                    header='Current Platforms',
+                    prefix=prefix,
+                    parenturl='/pkgs',
+                    filelist=filelist,
+                    allow_delete=False,
+                    anaconda_release=False)
 
 
 @get('/pkgs/<platform>')
@@ -126,7 +148,13 @@ def get_platform(platform):
     platform_dir = ensure_platform_dir_exists(platform)
 
     filelist = sorted([ f for f in os.listdir(platform_dir) ])
-    return template('filelist_to_links', header='Packages', prefix=prefix, parenturl='/pkgs/'+platform, filelist=filelist, allow_delete=True)
+    return template('filelist_to_links',
+                    header='Packages',
+                    prefix=prefix,
+                    parenturl='/pkgs/'+platform,
+                    filelist=filelist,
+                    allow_delete=True,
+                    anaconda_release=anaconda_release)
 
 
 @get('/pkgs/<platform>/<filename>')
@@ -174,6 +202,18 @@ def del_file(platform, filename):
     # commit the delete
     # os.remove(os.path.join(tempdir, filename))
 
+    redirect(prefix + '/pkgs/' + platform)
+
+@post('/anaconda/release/pkgs/<platform>/<filename>')
+@post(prefix + '/anaconda/release/pkgs/<platform>/<filename>')
+def release_file(platform, filename)
+    """
+    Releases/Uploads file to anaconda cloud. By default, uploads to user's account. If organization
+    is specified, then upload to the org instead.
+    :param platform: released platform e.g. linux-64, linux-ppc64le etc.
+    :param filename: conda package file (tar.bz2) to be released to anaconda cloud 
+    :return: 
+    """
     redirect(prefix + '/pkgs/' + platform)
 
 

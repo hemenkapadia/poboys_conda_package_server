@@ -21,5 +21,16 @@ if [ -n "$POBOYS_S3_BUCKET" ]; then
     aws s3 sync s3://"$POBOYS_S3_BUCKET" pkgs
 fi
 
+# provide anaconda username and password to allow login
+if [[ -n "$ANACONDA_USERNAME" && -n "$ANACONDA_PASSWORD" ]]; then
+    ARGS="$ARGS"" --ac_user $ANACONDA_USER --ac_pass $ANACONDA_PASSWORD"
+fi
+
+# if anaconda org is provided, upload to org.
+# By default, packages will be uploaded to the user account
+if [[ -n "$ANACONDA_ORG" ]]; then
+    ARGS="$ARGS"" --ac_org $ANACONDA_ORG"
+fi
+
 echo "Serving..."
 python poboys_conda_package_server.py $ARGS
