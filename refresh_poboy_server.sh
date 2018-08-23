@@ -82,6 +82,9 @@ build_docker_image() {
 start_poboy_conda_server() {
    docker run -d --name "${CONTAINER_NAME}" \
               -p 6969:6969 \
+              -e ANACONDA_USERNAME \
+              -e ANACONDA_PASSWORD \
+              -e ANACONDA_ORG \
               -v $(pwd)/../conda-repo-root:/opt/"${IMAGE_NAME}" \
               "${IMAGE_NAME}"
 }
