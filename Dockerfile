@@ -18,7 +18,7 @@ RUN echo "channels:\n  - ActivisionGameScience\n  - defaults" > /root/.condarc#
 # update the root env and install some key packages
 # then create a conda env
 RUN conda update --all -y && \
-    conda install jinja2 conda-build -y && \
+    conda install jinja2 anaconda-client conda-build -y && \
     conda create -n poboys_env python=3.6 -y && \
     /bin/bash -c "source activate poboys_env && pip install bottle boto3 awscli"
 
