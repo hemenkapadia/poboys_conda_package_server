@@ -23,7 +23,7 @@ fi
 
 # provide anaconda username and password to allow login
 if [[ -n "$ANACONDA_USERNAME" && -n "$ANACONDA_PASSWORD" ]]; then
-    ARGS="$ARGS"" --ac_user $ANACONDA_USER --ac_pass $ANACONDA_PASSWORD"
+    ARGS="$ARGS"" --ac_user $ANACONDA_USERNAME --ac_pass $ANACONDA_PASSWORD"
 fi
 
 # if anaconda org is provided, upload to org.
