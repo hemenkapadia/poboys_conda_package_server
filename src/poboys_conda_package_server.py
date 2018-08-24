@@ -2,11 +2,12 @@
 
 from bottle import default_app, get, post, template, request, static_file, redirect, abort
 import os
-from subprocess import call
+from subprocess import call, Popen, PIPE, STDOUT
 import argparse
 import tempfile
 import sys
 import logging
+import base64
 
 log = logging.getLogger(__name__)
 out_hdlr = logging.StreamHandler(sys.stdout)
@@ -210,7 +211,7 @@ def del_file(platform, filename):
 
 @post('/anaconda/release/pkgs/<platform>/<filename>')
 @post(prefix + '/anaconda/release/pkgs/<platform>/<filename>')
-def release_file(platform, filename)
+def release_file(platform, filename):
     """
     Releases/Uploads file to anaconda cloud. By default, uploads to user's account. If organization
     is specified, then upload to the org instead.
@@ -218,7 +219,24 @@ def release_file(platform, filename)
     :param filename: conda package file (tar.bz2) to be released to anaconda cloud 
     :return: 
     """
-    redirect(prefix + '/pkgs/' + platform)
+    if not platform in platforms:
+        return "Unknown platform " + platform
+    ensure_platform_dir_exists(platform)
+
+    upload_commands = """
+    anaconda login --username {username} --password {password} &&
+    anaconda upload --no-progress -u {org} {file} &&
+    anaconda logout
+    """.format(username=anaconda_user,
+               password=anaconda_password,
+               org=anaconda_org or anaconda_user,
+               file=filename)
+    os.chdir('pkgs/'+platform)
+    cwd = os.getcwd()
+    p = Popen(upload_commands, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+    stdout_data, stderr_data = p.communicate()
+    os.chdir('../../')
+    redirect(prefix + '/pkgs/' + platform + '?' + 'message={msg}'.format(msg=base64.urlsafe_b64encode(stdout_data).decode('ascii').rstrip()))
 
 
 if __name__ == '__main__':

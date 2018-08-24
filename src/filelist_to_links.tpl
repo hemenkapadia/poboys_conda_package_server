@@ -2,7 +2,11 @@
 
 %if len(message) > 0:
 <h2>Message</h2>
-<div>{{message}}</div>
+<%
+    import base64
+    message = base64.urlsafe_b64decode(message).decode('ascii')
+%>
+<div><pre><code>{{message}}</code></pre></div>
 
 <h2>Available {{header}}</h2>
 %end
