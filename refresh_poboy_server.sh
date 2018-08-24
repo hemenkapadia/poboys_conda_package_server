@@ -5,23 +5,27 @@
 # Script to refresh poboy's conda repository server post code update to the git repo.
 # Following actions are performed.
 # > If poboy's server is running as a docker container, stop the container.
-# > Remove any docker images (if any) post the container shutdown.
+# > Remove any poboy server docker images (if any) post the container shutdown.
+# > If --refreshbase is provided then base docker image is also refreshed.
 # > Pull latest codebase from Git Repository
-# > Build a new docker image
+# > Build a new poboy server docker image (if refreshbase is passed then first base image will be built)
 # > Start container with the new built image, ensuring the repo directory is mapped correctly.
 
 SCRIPT_NAME=$(basename $0)
 CONTAINER_NAME="poboys_conda_server"
 IMAGE_NAME="poboys_conda_package_server"
+BASE_IMAGE_NAME="poboys_base_image"
+REFRESH_BASE=false
 
 usage() {
 cat << USAGE
-Usage: refresh_poboys_server.sh [-h]
+Usage: refresh_poboys_server.sh [-h] [--refreshbase]
 
 A script to refresh poboy's conda repository server to the latest code in the git repository.
 
 Options:
-    -h      Show this usage message
+    -h                  Show this usage message
+    --refreshbase       Optional. Refresh base docker image of poboy's server.
 
 USAGE
 }
@@ -42,11 +46,15 @@ error() {
 get_options() {
     while [[ "$1" != "" ]]; do
         case "$1" in
-            -h | --help )
+            --refreshbase )
+                shift
+                REFRESH_BASE=true
+                ;;
+             -h | --help )
                 usage
                 exit 0
                 ;;
-            * )
+           * )
                 usage
                 error "Incorrect parameters passed"
         esac
@@ -71,12 +79,23 @@ remove_container_image() {
     fi
 }
 
+remove_base_image() {
+    image_id=$(docker image ls -a --format "{{.Repository}},{{.ID}}" | grep "${BASE_IMAGE_NAME}" | cut -d "," -f 2)
+    if [[ -n "${image_id}" ]]; then
+        docker image rm "${image_id}"
+    fi
+}
+
 git_pull_latest() {
     git pull origin master
 }
 
 build_docker_image() {
-    docker build -t "${IMAGE_NAME}" .
+    docker build -t "${IMAGE_NAME}" --file ./Dockerfile .
+}
+
+build_base_image() {
+    docker build -t "${BASE_IMAGE_NAME}" --file ./Dockerfile-baseimg .
 }
 
 start_poboy_conda_server() {
@@ -92,7 +111,8 @@ start_poboy_conda_server() {
 main() {
     get_options $@
     check_stop_container || error "Docker container could not be removed" $?
-    remove_container_image || error "Docker image cound not be removed" $?
+    remove_container_image || error "Docker image could not be removed" $?
+    $REFRESH_BASE && ( remove_base_image && build_base_image || error "Base image could not be refreshed" $? )
     git_pull_latest || error "Unable to pull latest code from git" $?
     build_docker_image || error "Unable to build docker image" $?
     start_poboy_conda_server || error "Unable to start poboy server docker image" $?
