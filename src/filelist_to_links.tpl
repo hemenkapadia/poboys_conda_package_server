@@ -1,5 +1,13 @@
 <h1>{{header}}</h1>
 
+%if len(message) > 0:
+<h2>Message</h2>
+<div>{{message}}</div>
+
+<h2>Available {{header}}</h2>
+%end
+
+
 %for f in filelist:
     <div>
         <a href="{{prefix}}{{parenturl}}/{{f}}" style="display: inline-block;" >{{f}}</a>

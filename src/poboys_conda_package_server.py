@@ -122,21 +122,23 @@ def do_upload():
             reindex_platform_dir(platform_dir)
             abort(503, "Failed to upload to S3 %s with exception %s" % (s3_bucket, str(e)))
 
-    redirect(prefix + '/pkgs/' + platform)
+    redirect(prefix + '/pkgs/' + platform + '?' + 'message={filename} uploaded'.format(filename=filename))
 
 
 @get('/pkgs')
 @get(prefix + '/pkgs')
 def get_pkgs():
     pkgs_dir = ensure_pkgs_dir_exists()
+    message = request.query.message
     filelist = sorted([ f for f in os.listdir(pkgs_dir) ])
     return template('filelist_to_links',
-                    header='Current Platforms',
+                    header='Platforms',
                     prefix=prefix,
                     parenturl='/pkgs',
                     filelist=filelist,
                     allow_delete=False,
-                    anaconda_release=False)
+                    anaconda_release=False,
+                    message=message)
 
 
 @get('/pkgs/<platform>')
@@ -146,6 +148,7 @@ def get_platform(platform):
         return "Unknown platform " + platform
 
     platform_dir = ensure_platform_dir_exists(platform)
+    message = request.query.message
 
     filelist = sorted([ f for f in os.listdir(platform_dir) ])
     return template('filelist_to_links',
@@ -154,7 +157,8 @@ def get_platform(platform):
                     parenturl='/pkgs/'+platform,
                     filelist=filelist,
                     allow_delete=True,
-                    anaconda_release=anaconda_release)
+                    anaconda_release=anaconda_release,
+                    message=message)
 
 
 @get('/pkgs/<platform>/<filename>')
