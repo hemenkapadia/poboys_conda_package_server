@@ -6,43 +6,44 @@ This is a server that acts as a repository for conda packages.  It is a "poor-ma
 for Anaconda Server.  Only small groups behind a firewall should feel comfortable using this.
 There is no authentication, nor logging.  Anybody can upload and delete packages!
 
-The server requires ``conda`` and ``bottle`` to run.
+Docker instructions
+===================
 
-After cloning, you can start the server like this::
+The script ``refresh_poboy_server.sh`` can be used to quickly setup the server. It builds two docker images
 
-    cd src
-    python poboys_conda_package_server.py --port 6969
+1. poboys_base_image - as base image with all dependencies required for poboy's server to run
+2. poboys_conda_package_server - the docker image with the poboy's server code. It is built on top of the base image.
 
-Optionally, you can have it sync with an s3 bucket (this assumes that you have ``boto3`` installed)::
+To build both docker images (needed for the first time) and start the server issue the command
 
-    python poboys_conda_package_server.py --port 6969 --s3_bucket <YOURBUCKET>
-
-(You should set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY env vars for this to work).
+``mkdir conda-repo-root && \
+  git clone https://github.com/h2oai/poboys_conda_package_server.git && \
+  cd poboys_conda_package_server && ./refresh_poboy_server.sh --refreshbase``
 
 It has a simple web interface - browse to the appropriate url and have a look::
 
     http://your.hostname:6969
 
-In order for a client to recognize it, add the following line to its ``.condarc``::
+Environment Variables
+=====================
 
-    - http://your.hostname:6969/pkgs
+If you want to specify a different port or an S3 bucket then you can setup the following environment variables on the
+Host machine and run ``refresh_poboy_server.sh`` to refresh only the poboy server image
 
+    export POBOYS_PORT=6969
+    export POBOYS_S3_BUCKET=<YOURBUCKET>
+    export AWS_ACCESS_KEY_ID=<YOURKEY>
+    export AWS_SECRET_ACCESS_KEY=<YOURSECRET>
 
-Docker instructions
-===================
+Packages available in Poboy's server can we uploaded to anaconda cloud at the click of a button. Ensure the following
+environment variables are set
 
-First create a docker image for ``poboys_conda_package_server``::
+    export ANACONDA_USERNAME=<YOURANACONDAUSERNAME>
+    export ANACONDA_PASSWORD=<YOURPASSWORD>
+    export ANACONDA_ORG=<YOURORG>
 
-    sudo docker build -t poboys_conda_package_server .
-
-and launch it (the ``-v`` is there to persist the data on the host)::
-
-    sudo docker run -d --name poboys_conda_package_server -p 6969:6969 -v /data/dir/on/host:/opt/poboys_conda_package_server poboys_conda_package_server
-
-If you want to specify a different port or an S3 bucket then you can modify the ``Dockerfile`` before building to add the following env vars::
-
-    POBOYS_PORT=6969
-    POBOYS_S3_BUCKET=<YOURBUCKET>
+Note: if ANACONDA_ORG is set then by default packages will be uploaded to the Organization. If not set, then packages are
+uploaded to user's account.
 
 
 License
