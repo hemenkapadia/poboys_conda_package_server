@@ -104,6 +104,10 @@ start_poboy_conda_server() {
               -e ANACONDA_USERNAME \
               -e ANACONDA_PASSWORD \
               -e ANACONDA_ORG \
+              -e POBOYS_PORT \
+              -e POBOYS_S3_BUCKET \
+              -e AWS_ACCESS_KEY_ID \
+              -e AWS_SECRET_ACCESS_KEY \
               -v $(pwd)/../conda-repo-root:/opt/"${IMAGE_NAME}" \
               "${IMAGE_NAME}"
 }
