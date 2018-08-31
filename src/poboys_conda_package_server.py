@@ -105,7 +105,7 @@ def do_upload():
 
     platform_dir = ensure_platform_dir_exists(platform)
 
-    fileupload.save(platform_dir, overwrite=True)
+    fileupload.save(platform_dir, overwrite=False)
     index_filenames = reindex_platform_dir(platform_dir)
 
     # upload to S3 if requested
